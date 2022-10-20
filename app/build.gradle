@@ -26,11 +26,11 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'automata.App'
+    mainClass = 'main.App'
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'automatas.App'
+        attributes 'Main-Class': 'main.App'
     }
 }

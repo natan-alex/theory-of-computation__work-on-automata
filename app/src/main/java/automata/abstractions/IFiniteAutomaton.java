@@ -10,15 +10,16 @@
 package automata.abstractions;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface IFiniteAutomaton {
-    String[] getAlphabet();
+    Set<String> getAlphabet();
 
-    IState[] getAllStates();
+    Set<BaseState> getAllStates();
 
-    IState getInitialState();
+    BaseState getInitialState();
 
-    IState[] getFinalStates();
+    Set<BaseState> getFinalStates();
 
-    Map<IState, ITransition[]> getTransitions();
+    Map<BaseState, BaseTransition[]> getTransitions();
 }
