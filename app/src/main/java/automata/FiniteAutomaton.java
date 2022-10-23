@@ -107,18 +107,17 @@ public class FiniteAutomaton implements IFiniteAutomaton {
             BaseState currentState,
             String[] sentence,
             int currentSymbolIndex) {
-        while (currentSymbolIndex < sentence.length) {
+        while (currentState != null && currentSymbolIndex < sentence.length) {
             var currentSymbol = sentence[currentSymbolIndex++];
             var nextStates = transitionFunction.whereToGoWith(currentState, currentSymbol);
             var numberOfNextStates = nextStates.size();
 
-            if (numberOfNextStates == 1) {
-                currentState = nextStates.iterator().next();
-            } else if (numberOfNextStates > 1) {
-                return handleNonDeterminism(nextStates, sentence, currentSymbolIndex);
-            } else {
+            if (numberOfNextStates == 0) {
                 currentState = null;
-                break;
+            } else if (numberOfNextStates == 1) {
+                currentState = nextStates.iterator().next();
+            } else {
+                return handleNonDeterminism(nextStates, sentence, currentSymbolIndex);
             }
         }
 
@@ -131,6 +130,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
             int currentSymbolIndex) {
         for (var state : nextStates) {
             var wasAccepted = recursivelyCheckIfSentenceIsAcceptable(state, sentence, currentSymbolIndex);
+
             if (wasAccepted) {
                 return true;
             }
