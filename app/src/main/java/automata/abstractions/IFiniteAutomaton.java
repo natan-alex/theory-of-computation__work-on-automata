@@ -9,7 +9,6 @@
 
 package automata.abstractions;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface IFiniteAutomaton {
@@ -21,5 +20,9 @@ public interface IFiniteAutomaton {
 
     Set<BaseState> getFinalStates();
 
-    Map<BaseState, BaseTransition[]> getTransitions();
+    ITransitionFunction getTransitionFunction();
+
+    boolean isSentenceAcceptable(String... sentence);
+
+    BaseState[] runStepByStep(String... sentence);
 }

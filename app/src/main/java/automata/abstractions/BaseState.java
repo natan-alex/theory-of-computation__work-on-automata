@@ -9,7 +9,7 @@ public abstract class BaseState {
 
     public abstract void setIfIsAFinalState(boolean isAFinalState);
 
-    public abstract void setIsIsTheInitialState(boolean isTheInitialState);
+    public abstract void setIfIsTheInitialState(boolean isTheInitialState);
 
     @Override
     public boolean equals(Object o) {
