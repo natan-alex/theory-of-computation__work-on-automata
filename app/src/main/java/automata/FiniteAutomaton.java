@@ -1,5 +1,7 @@
 package automata;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,6 +19,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     private final BaseState initialState;
     private final Set<BaseState> finalStates;
     private final ITransitionFunction transitionFunction;
+    private final List<BaseState> stepsToCheckIfSentenceWasAcceptable;
 
     public FiniteAutomaton(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
@@ -30,6 +33,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
         alphabet = getAlphabetFrom(transitionSet);
         allStates = getAllStatesFrom(transitionSet);
         finalStates = getFinalStatesFromAllStates();
+        stepsToCheckIfSentenceWasAcceptable = new ArrayList<>();
     }
 
     private Set<BaseState> getFinalStatesFromAllStates() {
@@ -67,6 +71,64 @@ public class FiniteAutomaton implements IFiniteAutomaton {
                 .collect(Collectors.toSet());
     }
 
+    private boolean recursivelyCheckIfIsSentenceAcceptable(String[] sentence) {
+        return recursivelyCheckIfIsSentenceAcceptable(sentence, false);
+    }
+
+    private boolean recursivelyCheckIfIsSentenceAcceptable(String[] sentence, boolean canComputeSteps) {
+        if (canComputeSteps) {
+            stepsToCheckIfSentenceWasAcceptable.clear();
+        }
+
+        return recursivelyCheckIfIsSentenceAcceptable(initialState, sentence, 0);
+    }
+
+    private void registerStepForState(BaseState state) {
+        if (stepsToCheckIfSentenceWasAcceptable != null && state != null) {
+            stepsToCheckIfSentenceWasAcceptable.add(state);
+        }
+    }
+
+    private boolean recursivelyCheckIfIsSentenceAcceptable(
+            BaseState currentState,
+            String[] sentence,
+            int currentSymbolIndex) {
+        while (currentState != null && currentSymbolIndex < sentence.length) {
+            registerStepForState(currentState);
+
+            var currentSymbol = sentence[currentSymbolIndex++];
+            var nextStates = transitionFunction.whereToGoWith(currentState, currentSymbol);
+            var numberOfNextStates = nextStates.size();
+
+            if (numberOfNextStates == 0) {
+                currentState = null;
+            } else if (numberOfNextStates == 1) {
+                currentState = nextStates.iterator().next();
+            } else {
+                return handleNonDeterminism(nextStates, sentence, currentSymbolIndex);
+            }
+        }
+
+        registerStepForState(currentState);
+
+        return currentState != null && currentState.isAFinalState();
+    }
+
+    private boolean handleNonDeterminism(
+            Set<? extends BaseState> nextStates,
+            String[] sentence,
+            int currentSymbolIndex) {
+        for (var state : nextStates) {
+            var wasAccepted = recursivelyCheckIfIsSentenceAcceptable(state, sentence, currentSymbolIndex);
+
+            if (wasAccepted) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public Set<String> getAlphabet() {
         return alphabet;
@@ -97,51 +159,17 @@ public class FiniteAutomaton implements IFiniteAutomaton {
         ArrayUtils.throwIfNullOrEmpty(sentence, "sentence");
         ArrayUtils.throwIfAnyElementIsNullOrEmpty(sentence, "sentence");
 
-        var currentState = initialState;
-        var currentSymbolIndex = 0;
-
-        return recursivelyCheckIfSentenceIsAcceptable(currentState, sentence, currentSymbolIndex);
-    }
-
-    private boolean recursivelyCheckIfSentenceIsAcceptable(
-            BaseState currentState,
-            String[] sentence,
-            int currentSymbolIndex) {
-        while (currentState != null && currentSymbolIndex < sentence.length) {
-            var currentSymbol = sentence[currentSymbolIndex++];
-            var nextStates = transitionFunction.whereToGoWith(currentState, currentSymbol);
-            var numberOfNextStates = nextStates.size();
-
-            if (numberOfNextStates == 0) {
-                currentState = null;
-            } else if (numberOfNextStates == 1) {
-                currentState = nextStates.iterator().next();
-            } else {
-                return handleNonDeterminism(nextStates, sentence, currentSymbolIndex);
-            }
-        }
-
-        return currentState != null && currentState.isAFinalState();
-    }
-
-    private boolean handleNonDeterminism(
-            Set<? extends BaseState> nextStates,
-            String[] sentence,
-            int currentSymbolIndex) {
-        for (var state : nextStates) {
-            var wasAccepted = recursivelyCheckIfSentenceIsAcceptable(state, sentence, currentSymbolIndex);
-
-            if (wasAccepted) {
-                return true;
-            }
-        }
-
-        return false;
+        return recursivelyCheckIfIsSentenceAcceptable(sentence);
     }
 
     @Override
-    public BaseState[] runStepByStep(String... sentence) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<BaseState> runStepByStep(String... sentence) {
+        ArrayUtils.throwIfNullOrEmpty(sentence, "sentence");
+        ArrayUtils.throwIfAnyElementIsNullOrEmpty(sentence, "sentence");
+
+        recursivelyCheckIfIsSentenceAcceptable(sentence, true);
+
+        return stepsToCheckIfSentenceWasAcceptable;
     }
+
 }

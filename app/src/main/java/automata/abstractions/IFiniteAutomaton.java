@@ -9,6 +9,7 @@
 
 package automata.abstractions;
 
+import java.util.List;
 import java.util.Set;
 
 public interface IFiniteAutomaton {
@@ -24,5 +25,5 @@ public interface IFiniteAutomaton {
 
     boolean isSentenceAcceptable(String... sentence);
 
-    BaseState[] runStepByStep(String... sentence);
+    List<BaseState> runStepByStep(String... sentence);
 }

@@ -1,5 +1,6 @@
 package tests.automata;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -133,5 +134,26 @@ public class FiniteAutomatonTest {
     @Test
     public void rejectInvalidSentenceThatRequireANonDeterministicFiniteAutomaton() {
         assertFalse(automaton.isSentenceAcceptable("a", "b", "b", "d"));
+    }
+
+    @Test
+    public void stepsAreCorrectlyReturnedForDeterministicSimpleCase() {
+        var steps = List.of(someStates[0], someStates[1], someStates[3]);
+        var givenSteps = automaton.runStepByStep("a", "b");
+        assertTrue(steps.equals(givenSteps));
+    }
+
+    @Test
+    public void stepsAreCorrectlyReturnedWhenABranchOccursAndAllStatesAreChecked() {
+        var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[4]);
+        var givenSteps = automaton.runStepByStep("a", "b", "b");
+        assertTrue(steps.equals(givenSteps));
+    }
+
+    @Test
+    public void stepsAreCorrectlyReturnedWhenABranchOccursAndAStateIsAccepted() {
+        var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[2], someStates[4]);
+        var givenSteps = automaton.runStepByStep("a", "b", "b", "c");
+        assertTrue(steps.equals(givenSteps));
     }
 }
