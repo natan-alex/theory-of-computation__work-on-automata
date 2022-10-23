@@ -18,7 +18,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     private final Set<BaseState> finalStates;
     private final ITransitionFunction transitionFunction;
 
-    public FiniteAutomaton(Set<BaseTransition> transitionSet) {
+    public FiniteAutomaton(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
         var getInitialStateResult = getInitialStateFrom(transitionSet);
@@ -38,7 +38,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
                 .collect(Collectors.toSet());
     }
 
-    private Set<BaseState> getInitialStateFrom(Set<BaseTransition> transitionSet) {
+    private Set<BaseState> getInitialStateFrom(Set<? extends BaseTransition> transitionSet) {
         return transitionSet.stream()
                 .map(t -> Stream.concat(t.getDestinations().stream(), Stream.of(t.getOrigin())))
                 .flatMap(s -> s)
@@ -46,7 +46,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
                 .collect(Collectors.toSet());
     }
 
-    private void validateGetInitialStateResult(Set<BaseState> result) {
+    private void validateGetInitialStateResult(Set<? extends BaseState> result) {
         if (result.isEmpty()) {
             throw new IllegalArgumentException("The transition set does not have a initial state defined");
         } else if (result.size() != 1) {
@@ -54,14 +54,14 @@ public class FiniteAutomaton implements IFiniteAutomaton {
         }
     }
 
-    private Set<BaseState> getAllStatesFrom(Set<BaseTransition> transitionSet) {
+    private Set<BaseState> getAllStatesFrom(Set<? extends BaseTransition> transitionSet) {
         return transitionSet.stream()
                 .map(t -> Stream.concat(t.getDestinations().stream(), Stream.of(t.getOrigin())))
                 .flatMap(s -> s)
                 .collect(Collectors.toSet());
     }
 
-    private static Set<String> getAlphabetFrom(Set<BaseTransition> transitions) {
+    private static Set<String> getAlphabetFrom(Set<? extends BaseTransition> transitions) {
         return transitions.stream()
                 .map(t -> t.getSymbol())
                 .collect(Collectors.toSet());
@@ -96,6 +96,46 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     public boolean isSentenceAcceptable(String... sentence) {
         ArrayUtils.throwIfNullOrEmpty(sentence, "sentence");
         ArrayUtils.throwIfAnyElementIsNullOrEmpty(sentence, "sentence");
+
+        var currentState = initialState;
+        var currentSymbolIndex = 0;
+
+        return recursivelyCheckIfSentenceIsAcceptable(currentState, sentence, currentSymbolIndex);
+    }
+
+    private boolean recursivelyCheckIfSentenceIsAcceptable(
+            BaseState currentState,
+            String[] sentence,
+            int currentSymbolIndex) {
+        while (currentSymbolIndex < sentence.length) {
+            var currentSymbol = sentence[currentSymbolIndex++];
+            var nextStates = transitionFunction.whereToGoWith(currentState, currentSymbol);
+            var numberOfNextStates = nextStates.size();
+
+            if (numberOfNextStates == 1) {
+                currentState = nextStates.iterator().next();
+            } else if (numberOfNextStates > 1) {
+                return handleNonDeterminism(nextStates, sentence, currentSymbolIndex);
+            } else {
+                currentState = null;
+                break;
+            }
+        }
+
+        return currentState != null && currentState.isAFinalState();
+    }
+
+    private boolean handleNonDeterminism(
+            Set<? extends BaseState> nextStates,
+            String[] sentence,
+            int currentSymbolIndex) {
+        for (var state : nextStates) {
+            var wasAccepted = recursivelyCheckIfSentenceIsAcceptable(state, sentence, currentSymbolIndex);
+            if (wasAccepted) {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -16,13 +16,14 @@ import utils.StringUtils;
 public class TransitionFunction implements ITransitionFunction {
     private final Map<BaseState, Map<String, Set<BaseState>>> transitions;
 
-    public TransitionFunction(Set<BaseTransition> transitionSet) {
+    public TransitionFunction(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
         this.transitions = getTransitionsFrom(transitionSet);
     }
 
-    private Map<BaseState, Map<String, Set<BaseState>>> getTransitionsFrom(Set<BaseTransition> transitionSet) {
+    private Map<BaseState, Map<String, Set<BaseState>>> getTransitionsFrom(
+            Set<? extends BaseTransition> transitionSet) {
         var transitionMappings = new HashMap<BaseState, Map<String, Set<BaseState>>>();
 
         for (var transition : transitionSet) {

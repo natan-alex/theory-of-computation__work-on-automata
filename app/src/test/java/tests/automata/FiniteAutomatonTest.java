@@ -30,6 +30,8 @@ public class FiniteAutomatonTest {
                 new Transition(someStates[0], "a", someStates[1]),
                 new Transition(someStates[1], "b", someStates[3]),
                 new Transition(someStates[2], "c", someStates[2], someStates[4]),
+                new Transition(someStates[2], "d", someStates[0]),
+                new Transition(someStates[3], "b", someStates[2], someStates[4]),
                 new Transition(someStates[4], "a", someStates[1], someStates[3]));
 
         someStates[0].setIfIsTheInitialState(true);
@@ -53,7 +55,7 @@ public class FiniteAutomatonTest {
 
     @Test
     public void alphabetContainsAllSymbolsPresentInTheTransitions() {
-        assertEquals(Set.of("a", "b", "c"), automaton.getAlphabet());
+        assertEquals(Set.of("a", "b", "c", "d"), automaton.getAlphabet());
     }
 
     @Test
@@ -110,5 +112,26 @@ public class FiniteAutomatonTest {
         assertThrows(IllegalArgumentException.class, () -> {
             automaton.isSentenceAcceptable(new String[] { null });
         });
+    }
+
+    @Test
+    public void rejectSentencesWithSymbolsThatAreNotPresentInTheTransitionSet() {
+        assertFalse(automaton.isSentenceAcceptable("x", "y"));
+    }
+
+    @Test
+    public void acceptValidSentenceThatJustRequireADeterministicFiniteAutomaton() {
+        assertTrue(automaton.isSentenceAcceptable("a", "b"));
+    }
+
+    @Test
+    public void acceptValidSentenceThatRequireANonDeterministicFiniteAutomaton() {
+        assertTrue(automaton.isSentenceAcceptable("a", "b", "b"));
+        assertTrue(automaton.isSentenceAcceptable("a", "b", "b", "c"));
+    }
+
+    @Test
+    public void rejectInvalidSentenceThatRequireANonDeterministicFiniteAutomaton() {
+        assertFalse(automaton.isSentenceAcceptable("a", "b", "b", "d"));
     }
 }
