@@ -1,8 +1,8 @@
 package automata;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,22 +19,15 @@ public class TransitionFunction implements ITransitionFunction {
     public TransitionFunction(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
-        this.transitions = getTransitionsFrom(transitionSet);
-    }
-
-    private Map<BaseState, Map<String, Set<BaseState>>> getTransitionsFrom(
-            Set<? extends BaseTransition> transitionSet) {
-        var transitionMappings = new HashMap<BaseState, Map<String, Set<BaseState>>>();
+        this.transitions = new LinkedHashMap<>();
 
         for (var transition : transitionSet) {
-            transitionMappings.putIfAbsent(transition.getOrigin(), new HashMap<>());
-            var originMappings = transitionMappings.get(transition.getOrigin());
-            originMappings.putIfAbsent(transition.getSymbol(), new HashSet<>());
+            transitions.putIfAbsent(transition.getOrigin(), new LinkedHashMap<>());
+            var originMappings = transitions.get(transition.getOrigin());
+            originMappings.putIfAbsent(transition.getSymbol(), new LinkedHashSet<>());
             var symbolMappings = originMappings.get(transition.getSymbol());
             symbolMappings.addAll(transition.getDestinations());
         }
-
-        return transitionMappings;
     }
 
     @Override

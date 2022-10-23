@@ -1,8 +1,8 @@
 package tests.automata;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,23 +22,27 @@ public class FiniteAutomatonTest {
 
     @Before
     public void setup() {
-        someStates = IntStream.rangeClosed(1, 5)
-                .boxed()
-                .map(i -> new State(i.toString()))
-                .toArray(State[]::new);
-
-        someTransitions = Set.of(
-                new Transition(someStates[0], "a", someStates[1]),
-                new Transition(someStates[1], "b", someStates[3]),
-                new Transition(someStates[2], "c", someStates[2], someStates[4]),
-                new Transition(someStates[2], "d", someStates[0]),
-                new Transition(someStates[3], "b", someStates[2], someStates[4]),
-                new Transition(someStates[4], "a", someStates[1], someStates[3]));
+        someStates = new BaseState[] {
+                new State("0"),
+                new State("1"),
+                new State("2"),
+                new State("3"),
+                new State("4")
+        };
 
         someStates[0].setIfIsTheInitialState(true);
 
         someStates[3].setIfIsAFinalState(true);
         someStates[4].setIfIsAFinalState(true);
+
+        someTransitions = new LinkedHashSet<>();
+
+        someTransitions.add(new Transition(someStates[0], "a", someStates[1]));
+        someTransitions.add(new Transition(someStates[1], "b", someStates[3]));
+        someTransitions.add(new Transition(someStates[2], "c", someStates[2], someStates[4]));
+        someTransitions.add(new Transition(someStates[2], "d", someStates[0]));
+        someTransitions.add(new Transition(someStates[3], "b", someStates[2], someStates[4]));
+        someTransitions.add(new Transition(someStates[4], "a", someStates[1], someStates[3]));
 
         automaton = new FiniteAutomaton(someTransitions);
     }
@@ -140,20 +144,20 @@ public class FiniteAutomatonTest {
     public void stepsAreCorrectlyReturnedForDeterministicSimpleCase() {
         var steps = List.of(someStates[0], someStates[1], someStates[3]);
         var givenSteps = automaton.runStepByStep("a", "b");
-        assertTrue(steps.equals(givenSteps));
+        assertEquals(steps, givenSteps);
     }
 
     @Test
     public void stepsAreCorrectlyReturnedWhenABranchOccursAndAllStatesAreChecked() {
         var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[4]);
         var givenSteps = automaton.runStepByStep("a", "b", "b");
-        assertTrue(steps.equals(givenSteps));
+        assertEquals(steps, givenSteps);
     }
 
     @Test
     public void stepsAreCorrectlyReturnedWhenABranchOccursAndAStateIsAccepted() {
         var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[2], someStates[4]);
         var givenSteps = automaton.runStepByStep("a", "b", "b", "c");
-        assertTrue(steps.equals(givenSteps));
+        assertEquals(steps, givenSteps);
     }
 }

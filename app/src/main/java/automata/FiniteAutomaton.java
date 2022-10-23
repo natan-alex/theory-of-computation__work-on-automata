@@ -1,10 +1,10 @@
 package automata;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import automata.abstractions.BaseState;
 import automata.abstractions.BaseTransition;
@@ -24,51 +24,49 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     public FiniteAutomaton(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
-        var getInitialStateResult = getInitialStateFrom(transitionSet);
-
-        validateGetInitialStateResult(getInitialStateResult);
-
-        initialState = getInitialStateResult.iterator().next();
-        transitionFunction = new TransitionFunction(transitionSet);
-        alphabet = getAlphabetFrom(transitionSet);
-        allStates = getAllStatesFrom(transitionSet);
-        finalStates = getFinalStatesFromAllStates();
+        alphabet = new HashSet<>();
+        allStates = new HashSet<>();
+        finalStates = new HashSet<>();
         stepsToCheckIfSentenceWasAcceptable = new ArrayList<>();
+        transitionFunction = new TransitionFunction(transitionSet);
+
+        for (var transition : transitionSet) {
+            alphabet.add(transition.getSymbol());
+            allStates.add(transition.getOrigin());
+            allStates.addAll(transition.getDestinations());
+            addToFinalStateSet(transition);
+        }
+
+        initialState = getAndValidateInitialState();
     }
 
-    private Set<BaseState> getFinalStatesFromAllStates() {
-        return allStates.stream()
+    private void addToFinalStateSet(BaseTransition transition) {
+        var origin = transition.getOrigin();
+        var destinations = transition.getDestinations();
+
+        if (origin.isAFinalState()) {
+            finalStates.add(origin);
+        }
+
+        destinations.stream()
                 .filter(s -> s.isAFinalState())
-                .collect(Collectors.toSet());
+                .forEach(s -> finalStates.add(s));
     }
 
-    private Set<BaseState> getInitialStateFrom(Set<? extends BaseTransition> transitionSet) {
-        return transitionSet.stream()
-                .map(t -> Stream.concat(t.getDestinations().stream(), Stream.of(t.getOrigin())))
-                .flatMap(s -> s)
+    private BaseState getAndValidateInitialState() {
+        var initialStates = allStates.stream()
                 .filter(s -> s.isTheInitialState())
                 .collect(Collectors.toSet());
-    }
 
-    private void validateGetInitialStateResult(Set<? extends BaseState> result) {
-        if (result.isEmpty()) {
+        if (initialStates.isEmpty()) {
             throw new IllegalArgumentException("The transition set does not have a initial state defined");
-        } else if (result.size() != 1) {
+        }
+
+        if (initialStates.size() != 1) {
             throw new IllegalArgumentException("The transition set has more than one initial state defined");
         }
-    }
 
-    private Set<BaseState> getAllStatesFrom(Set<? extends BaseTransition> transitionSet) {
-        return transitionSet.stream()
-                .map(t -> Stream.concat(t.getDestinations().stream(), Stream.of(t.getOrigin())))
-                .flatMap(s -> s)
-                .collect(Collectors.toSet());
-    }
-
-    private static Set<String> getAlphabetFrom(Set<? extends BaseTransition> transitions) {
-        return transitions.stream()
-                .map(t -> t.getSymbol())
-                .collect(Collectors.toSet());
+        return initialStates.iterator().next();
     }
 
     private boolean recursivelyCheckIfIsSentenceAcceptable(String[] sentence) {
@@ -84,7 +82,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     }
 
     private void registerStepForState(BaseState state) {
-        if (stepsToCheckIfSentenceWasAcceptable != null && state != null) {
+        if (state != null) {
             stepsToCheckIfSentenceWasAcceptable.add(state);
         }
     }
@@ -93,6 +91,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
             BaseState currentState,
             String[] sentence,
             int currentSymbolIndex) {
+        System.out.println("current state: " + currentState != null ? currentState.getIdentifier() : "null");
         while (currentState != null && currentSymbolIndex < sentence.length) {
             registerStepForState(currentState);
 
