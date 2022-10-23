@@ -10,14 +10,14 @@ import java.util.Set;
 import automata.abstractions.BaseState;
 import automata.abstractions.BaseTransition;
 import automata.abstractions.ITransitionFunction;
-import utils.CollectionsUtils;
+import utils.CollectionUtils;
 import utils.StringUtils;
 
 public class TransitionFunction implements ITransitionFunction {
     private final Map<BaseState, Map<String, Set<BaseState>>> transitions;
 
     public TransitionFunction(Set<BaseTransition> transitionSet) {
-        CollectionsUtils.throwIfNullOrEmpty(transitionSet);
+        CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
         this.transitions = getTransitionsFrom(transitionSet);
     }
@@ -39,7 +39,7 @@ public class TransitionFunction implements ITransitionFunction {
     @Override
     public Set<BaseState> whereToGoWith(BaseState origin, String symbol) {
         Objects.requireNonNull(origin);
-        StringUtils.requireNonNullOrEmpty(symbol);
+        StringUtils.throwIfNullOrEmpty(symbol, "symbol");
 
         var possibleSymbols = transitions.get(origin);
 

@@ -36,14 +36,11 @@ public class TransitionFunctionTest {
     }
 
     @Test
-    public void throwsIfTheTransitionSetIsNull() {
+    public void throwsIfTheTransitionSetIsNullOrEmpty() {
         assertThrows(NullPointerException.class, () -> {
             new TransitionFunction(null);
         });
-    }
 
-    @Test
-    public void throwsIfTheTransitionSetIsEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
             new TransitionFunction(Set.of());
         });
@@ -57,30 +54,20 @@ public class TransitionFunctionTest {
     }
 
     @Test
-    public void throwsIfTheSymbolIsNull() {
+    public void throwsIfTheSymbolIsNullOrEmpty() {
         assertThrows(NullPointerException.class, () -> {
             transitionFunction.whereToGoWith(someStates[0], null);
         });
-    }
 
-    @Test
-    public void throwsIfTheSymbolIsEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
             transitionFunction.whereToGoWith(someStates[0], "");
         });
     }
 
     @Test
-    public void correctlyGiveASetWithOneElementAsTheDestination() {
-        var transitionFunction = new TransitionFunction(someTransitions);
-
+    public void correctlyReturnTheDestinationSet() {
         assertEquals(Set.of(someStates[1]),
                 transitionFunction.whereToGoWith(someStates[0], "a"));
-    }
-
-    @Test
-    public void correctlyGiveASetWithMoreThanOneElementAsTheDestination() {
-        var transitionFunction = new TransitionFunction(someTransitions);
 
         assertEquals(Set.of(someStates[2], someStates[4]),
                 transitionFunction.whereToGoWith(someStates[2], "c"));
@@ -88,8 +75,6 @@ public class TransitionFunctionTest {
 
     @Test
     public void correctlyGiveAnEmptySetAsTheDestination() {
-        var transitionFunction = new TransitionFunction(someTransitions);
-
         assertEquals(Set.of(), transitionFunction.whereToGoWith(someStates[0], "b"));
     }
 }

@@ -9,7 +9,8 @@ public class State extends BaseState {
     private boolean isTheInitialState;
 
     public State(String identifier) {
-        this.identifier = StringUtils.requireNonNullOrEmpty(identifier);
+        StringUtils.throwIfNullOrEmpty(identifier, "identifier");
+        this.identifier = identifier;
         this.isAFinalState = false;
         this.isTheInitialState = false;
     }

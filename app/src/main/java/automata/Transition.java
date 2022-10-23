@@ -13,8 +13,11 @@ public class Transition extends BaseTransition {
     private final Set<BaseState> destinations;
 
     public Transition(BaseState origin, String symbol, BaseState... destinations) {
-        this.origin = Objects.requireNonNull(origin);
-        this.symbol = StringUtils.requireNonNullOrEmpty(symbol);
+        Objects.requireNonNull(origin);
+        StringUtils.throwIfNullOrEmpty(symbol, "symbol");
+
+        this.origin = origin;
+        this.symbol = symbol;
         this.destinations = Set.of(destinations);
     }
 

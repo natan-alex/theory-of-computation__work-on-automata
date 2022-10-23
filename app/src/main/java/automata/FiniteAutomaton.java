@@ -8,7 +8,8 @@ import automata.abstractions.BaseState;
 import automata.abstractions.BaseTransition;
 import automata.abstractions.IFiniteAutomaton;
 import automata.abstractions.ITransitionFunction;
-import utils.CollectionsUtils;
+import utils.ArrayUtils;
+import utils.CollectionUtils;
 
 public class FiniteAutomaton implements IFiniteAutomaton {
     private final Set<String> alphabet;
@@ -18,7 +19,7 @@ public class FiniteAutomaton implements IFiniteAutomaton {
     private final ITransitionFunction transitionFunction;
 
     public FiniteAutomaton(Set<BaseTransition> transitionSet) {
-        CollectionsUtils.throwIfNullOrEmpty(transitionSet);
+        CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
         var getInitialStateResult = getInitialStateFrom(transitionSet);
 
@@ -93,7 +94,8 @@ public class FiniteAutomaton implements IFiniteAutomaton {
 
     @Override
     public boolean isSentenceAcceptable(String... sentence) {
-        // TODO Auto-generated method stub
+        ArrayUtils.throwIfNullOrEmpty(sentence, "sentence");
+        ArrayUtils.throwIfAnyElementIsNullOrEmpty(sentence, "sentence");
         return false;
     }
 
