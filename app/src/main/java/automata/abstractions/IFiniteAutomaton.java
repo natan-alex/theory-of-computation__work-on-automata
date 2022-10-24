@@ -9,7 +9,6 @@
 
 package automata.abstractions;
 
-import java.util.List;
 import java.util.Set;
 
 public interface IFiniteAutomaton {
@@ -23,7 +22,7 @@ public interface IFiniteAutomaton {
 
     ITransitionFunction getTransitionFunction();
 
-    boolean isSentenceAcceptable(String... sentence);
+    boolean isDeterministic();
 
-    List<BaseState> runStepByStep(String... sentence);
+    AutomatonSimulationResult simulate(String... sentence);
 }

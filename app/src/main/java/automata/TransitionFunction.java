@@ -1,8 +1,8 @@
 package automata;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,12 +19,12 @@ public class TransitionFunction implements ITransitionFunction {
     public TransitionFunction(Set<? extends BaseTransition> transitionSet) {
         CollectionUtils.throwIfNullOrEmpty(transitionSet, "transitionSet");
 
-        this.transitions = new LinkedHashMap<>();
+        this.transitions = new HashMap<>();
 
         for (var transition : transitionSet) {
-            transitions.putIfAbsent(transition.getOrigin(), new LinkedHashMap<>());
+            transitions.putIfAbsent(transition.getOrigin(), new HashMap<>());
             var originMappings = transitions.get(transition.getOrigin());
-            originMappings.putIfAbsent(transition.getSymbol(), new LinkedHashSet<>());
+            originMappings.putIfAbsent(transition.getSymbol(), new HashSet<>());
             var symbolMappings = originMappings.get(transition.getSymbol());
             symbolMappings.addAll(transition.getDestinations());
         }

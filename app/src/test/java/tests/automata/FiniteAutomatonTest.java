@@ -1,6 +1,5 @@
 package tests.automata;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,14 +34,13 @@ public class FiniteAutomatonTest {
         someStates[3].setIfIsAFinalState(true);
         someStates[4].setIfIsAFinalState(true);
 
-        someTransitions = new LinkedHashSet<>();
-
-        someTransitions.add(new Transition(someStates[0], "a", someStates[1]));
-        someTransitions.add(new Transition(someStates[1], "b", someStates[3]));
-        someTransitions.add(new Transition(someStates[2], "c", someStates[2], someStates[4]));
-        someTransitions.add(new Transition(someStates[2], "d", someStates[0]));
-        someTransitions.add(new Transition(someStates[3], "b", someStates[2], someStates[4]));
-        someTransitions.add(new Transition(someStates[4], "a", someStates[1], someStates[3]));
+        someTransitions = Set.of(
+                new Transition(someStates[0], "a", someStates[1]),
+                new Transition(someStates[1], "b", someStates[3]),
+                new Transition(someStates[2], "c", someStates[2], someStates[4]),
+                new Transition(someStates[2], "d", someStates[0]),
+                new Transition(someStates[3], "b", someStates[2], someStates[4]),
+                new Transition(someStates[4], "a", someStates[1], someStates[3]));
 
         automaton = new FiniteAutomaton(someTransitions);
     }
@@ -100,64 +98,94 @@ public class FiniteAutomatonTest {
     public void throwsIfTheSentenceIsNullOrEmpty() {
         assertThrows(NullPointerException.class, () -> {
             String[] sentence = null;
-            automaton.isSentenceAcceptable(sentence);
+            automaton.simulate(sentence);
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            automaton.isSentenceAcceptable(new String[0]);
+            automaton.simulate(new String[0]);
         });
     }
 
     @Test
     public void throwsIfTheSentenceContainsAnyElementThatIsNullOrEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
-            automaton.isSentenceAcceptable(new String[] { "" });
+            automaton.simulate(new String[] { "" });
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            automaton.isSentenceAcceptable(new String[] { null });
+            automaton.simulate(new String[] { null });
         });
     }
 
     @Test
     public void rejectSentencesWithSymbolsThatAreNotPresentInTheTransitionSet() {
-        assertFalse(automaton.isSentenceAcceptable("x", "y"));
+        var result = automaton.simulate("x", "y");
+        assertFalse(result.wasSentenceAccepted());
     }
 
     @Test
     public void acceptValidSentenceThatJustRequireADeterministicFiniteAutomaton() {
-        assertTrue(automaton.isSentenceAcceptable("a", "b"));
+        var result = automaton.simulate("a", "b");
+        assertTrue(result.wasSentenceAccepted());
     }
 
     @Test
     public void acceptValidSentenceThatRequireANonDeterministicFiniteAutomaton() {
-        assertTrue(automaton.isSentenceAcceptable("a", "b", "b"));
-        assertTrue(automaton.isSentenceAcceptable("a", "b", "b", "c"));
+        var result = automaton.simulate("a", "b", "b");
+        assertTrue(result.wasSentenceAccepted());
+
+        result = automaton.simulate("a", "b", "b", "c");
+        assertTrue(result.wasSentenceAccepted());
     }
 
     @Test
     public void rejectInvalidSentenceThatRequireANonDeterministicFiniteAutomaton() {
-        assertFalse(automaton.isSentenceAcceptable("a", "b", "b", "d"));
+        var result = automaton.simulate("a", "b", "b", "d");
+        assertFalse(result.wasSentenceAccepted());
     }
 
     @Test
     public void stepsAreCorrectlyReturnedForDeterministicSimpleCase() {
-        var steps = List.of(someStates[0], someStates[1], someStates[3]);
-        var givenSteps = automaton.runStepByStep("a", "b");
-        assertEquals(steps, givenSteps);
+        var result = List.of(someStates[0], someStates[1], someStates[3]);
+        var givenResult = automaton.simulate("a", "b").getVisitedStates();
+
+        assertEquals(result, givenResult);
     }
 
     @Test
     public void stepsAreCorrectlyReturnedWhenABranchOccursAndAllStatesAreChecked() {
-        var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[4]);
-        var givenSteps = automaton.runStepByStep("a", "b", "b");
-        assertEquals(steps, givenSteps);
+        var possibleResults = List.of(
+                List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[4]),
+                List.of(someStates[0], someStates[1], someStates[3], someStates[4]));
+
+        var givenResult = automaton.simulate("a", "b", "b").getVisitedStates();
+
+        assertTrue(possibleResults.stream().anyMatch(r -> r.equals(givenResult)));
     }
+
+    /*
+     * someTransitions.add(new Transition(someStates[0], "a", someStates[1]));
+     * someTransitions.add(new Transition(someStates[1], "b", someStates[3]));
+     * someTransitions.add(new Transition(someStates[2], "c", someStates[2],
+     * someStates[4]));
+     * someTransitions.add(new Transition(someStates[2], "d", someStates[0]));
+     * someTransitions.add(new Transition(someStates[3], "b", someStates[2],
+     * someStates[4]));
+     * someTransitions.add(new Transition(someStates[4], "a", someStates[1],
+     * someStates[3]));
+     */
 
     @Test
     public void stepsAreCorrectlyReturnedWhenABranchOccursAndAStateIsAccepted() {
-        var steps = List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[2], someStates[4]);
-        var givenSteps = automaton.runStepByStep("a", "b", "b", "c");
-        assertEquals(steps, givenSteps);
+        var possibleResults = List.of(
+                List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[2],
+                        someStates[4]),
+                List.of(someStates[0], someStates[1], someStates[3], someStates[2], someStates[4]),
+                List.of(someStates[0], someStates[1], someStates[3], someStates[4], someStates[2],
+                        someStates[4]),
+                List.of(someStates[0], someStates[1], someStates[3], someStates[4], someStates[2],
+                        someStates[2], someStates[4]));
+        var givenResult = automaton.simulate("a", "b", "b", "c").getVisitedStates();
+        assertTrue(possibleResults.stream().anyMatch(r -> r.equals(givenResult)));
     }
 }
