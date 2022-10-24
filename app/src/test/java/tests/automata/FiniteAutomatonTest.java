@@ -163,18 +163,6 @@ public class FiniteAutomatonTest {
         assertTrue(possibleResults.stream().anyMatch(r -> r.equals(givenResult)));
     }
 
-    /*
-     * someTransitions.add(new Transition(someStates[0], "a", someStates[1]));
-     * someTransitions.add(new Transition(someStates[1], "b", someStates[3]));
-     * someTransitions.add(new Transition(someStates[2], "c", someStates[2],
-     * someStates[4]));
-     * someTransitions.add(new Transition(someStates[2], "d", someStates[0]));
-     * someTransitions.add(new Transition(someStates[3], "b", someStates[2],
-     * someStates[4]));
-     * someTransitions.add(new Transition(someStates[4], "a", someStates[1],
-     * someStates[3]));
-     */
-
     @Test
     public void stepsAreCorrectlyReturnedWhenABranchOccursAndAStateIsAccepted() {
         var possibleResults = List.of(
@@ -185,7 +173,9 @@ public class FiniteAutomatonTest {
                         someStates[4]),
                 List.of(someStates[0], someStates[1], someStates[3], someStates[4], someStates[2],
                         someStates[2], someStates[4]));
+
         var givenResult = automaton.simulate("a", "b", "b", "c").getVisitedStates();
+
         assertTrue(possibleResults.stream().anyMatch(r -> r.equals(givenResult)));
     }
 }
