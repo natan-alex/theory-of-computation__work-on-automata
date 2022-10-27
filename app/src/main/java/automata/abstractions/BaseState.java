@@ -22,4 +22,9 @@ public abstract class BaseState {
 
         return identifier.compareToIgnoreCase(otherObjectIdentifier) == 0;
     }
+
+    @Override
+    public int hashCode() {
+        return getIdentifier().hashCode();
+    }
 }
