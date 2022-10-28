@@ -12,6 +12,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.util.Set;
+import java.util.List;
 
 public class FiniteAutomatonConverterTest {
     private IFiniteAutomatonConverter converter;
@@ -61,11 +62,64 @@ public class FiniteAutomatonConverterTest {
     }
 
     @Test
-    public void convertedAutomatonHasManyThingsThatAreTheSameToTheOriginalOne() {
+    public void convertedAutomatonHasThingsThatAreSimilarToTheOriginalOne() {
         var converted = converter.convertNonDeterministicAutomatonToADeterministicOne(automatonToBeConverted);
 
         assertTrue(converted.isDeterministic());
         assertEquals(converted.getAlphabet(), automatonToBeConverted.getAlphabet());
         assertEquals(converted.getInitialState(), automatonToBeConverted.getInitialState());
+    }
+
+    @Test
+    public void convertedAutomatonHasTheCorrectStates() {
+        var converted = converter.convertNonDeterministicAutomatonToADeterministicOne(automatonToBeConverted);
+
+        var states = converted.getAllStates();
+
+        var statesThatMustBePresent = List.of(
+                new State("0"),
+                new State("1"));
+        var oneOfTheseMustBePresent = List.of(
+                new State("1,0"),
+                new State("0,1"));
+
+        assertTrue(states.containsAll(statesThatMustBePresent));
+        assertTrue(oneOfTheseMustBePresent.stream().anyMatch(s -> states.contains(s)));
+    }
+
+    @Test
+    public void convertedAutomatonHasTheCorrectFinalStates() {
+        var converted = converter.convertNonDeterministicAutomatonToADeterministicOne(automatonToBeConverted);
+
+        var states = converted.getFinalStates();
+
+        var statesThatMustBePresent = List.of(
+                new State("1"));
+        var oneOfTheseMustBePresent = List.of(
+                new State("1,0"),
+                new State("0,1"));
+
+        assertTrue(states.containsAll(statesThatMustBePresent));
+        assertTrue(oneOfTheseMustBePresent.stream().anyMatch(s -> states.contains(s)));
+    }
+
+    @Test
+    public void convertedAutomatonHasTheCorrectTransitions() {
+        var converted = converter.convertNonDeterministicAutomatonToADeterministicOne(automatonToBeConverted);
+
+        var transitionFunction = converted.getTransitionFunction();
+
+        var state0 = new State("0");
+        var state1 = new State("1");
+        var oneOfTheseIsPresent = List.of(new State("1,0"), new State("0,1"));
+
+        assertTrue(oneOfTheseIsPresent.stream()
+                .anyMatch(s -> transitionFunction.whereToGoWith(state0, "a").equals(Set.of(s))));
+        assertTrue(
+                oneOfTheseIsPresent.stream().anyMatch(s -> transitionFunction.whereToGoWith(s, "a").equals(Set.of(s))));
+        assertTrue(
+                oneOfTheseIsPresent.stream()
+                        .anyMatch(s -> transitionFunction.whereToGoWith(s, "b").equals(Set.of(state1))));
+        assertEquals(Set.of(state1), transitionFunction.whereToGoWith(state1, "b"));
     }
 }
