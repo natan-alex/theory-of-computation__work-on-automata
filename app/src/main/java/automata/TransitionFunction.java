@@ -37,7 +37,7 @@ public class TransitionFunction implements ITransitionFunction {
 
         var possibleSymbols = transitions.get(origin);
 
-        if (possibleSymbols.isEmpty()) {
+        if (possibleSymbols == null || possibleSymbols.isEmpty()) {
             return Collections.emptySet();
         }
 
