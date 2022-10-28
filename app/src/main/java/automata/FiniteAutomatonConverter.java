@@ -35,14 +35,13 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
         validateAutomaton(automaton);
 
         automatonToBeConverted = automaton;
+        automatonTransitionFunction = automaton.getTransitionFunction();
+
         statesToWalkThrought = new LinkedList<Set<BaseState>>();
         newAutomatonTransitions = new HashSet<BaseTransition>();
         destinationsAndCorrespondingStates = new HashMap<Set<BaseState>, BaseState>();
 
-        automatonTransitionFunction = automaton.getTransitionFunction();
-
         initStatesToWalkThroughtAndDestinationsMappings();
-
         walkThroughtStatesFillingTheTransitionSet();
 
         return new FiniteAutomaton(newAutomatonTransitions);
