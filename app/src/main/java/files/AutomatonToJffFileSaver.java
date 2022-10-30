@@ -52,8 +52,8 @@ public class AutomatonToJffFileSaver implements IAutomatonToJffFileSaver {
     private void writeAutomatonStatesToFile() throws IOException {
         for (var state : automatonToSave.getAllStates()) {
             writeToFileThenAddNewLine("\t<state id=\"" + state.getIdentifier() + "\">");
-            writeToFileThenAddNewLine("\t\t<x>0.00<x>");
-            writeToFileThenAddNewLine("\t\t<y>0.00<y>");
+            writeToFileThenAddNewLine("\t\t<x>0.00</x>");
+            writeToFileThenAddNewLine("\t\t<y>0.00</y>");
 
             if (state.isTheInitialState()) {
                 writeToFileThenAddNewLine("\t\t<initial/>");
