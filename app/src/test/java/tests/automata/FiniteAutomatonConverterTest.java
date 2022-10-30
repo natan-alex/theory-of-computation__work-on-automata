@@ -76,15 +76,16 @@ public class FiniteAutomatonConverterTest {
 
         var states = converted.getAllStates();
 
-        var statesThatMustBePresent = List.of(
+        var statesThatShouldBePresent = List.of(
                 new State("0"),
                 new State("1"));
-        var oneOfTheseMustBePresent = List.of(
-                new State("1,0"),
-                new State("0,1"));
 
-        assertTrue(states.containsAll(statesThatMustBePresent));
-        assertTrue(oneOfTheseMustBePresent.stream().anyMatch(s -> states.contains(s)));
+        var oneOfTheseShouldBePresent = List.of(
+                new State("[1, 0]"),
+                new State("[0, 1]"));
+
+        assertTrue(states.containsAll(statesThatShouldBePresent));
+        assertTrue(oneOfTheseShouldBePresent.stream().anyMatch(s -> states.contains(s)));
     }
 
     @Test
@@ -93,14 +94,20 @@ public class FiniteAutomatonConverterTest {
 
         var states = converted.getFinalStates();
 
-        var statesThatMustBePresent = List.of(
-                new State("1"));
-        var oneOfTheseMustBePresent = List.of(
-                new State("1,0"),
-                new State("0,1"));
+        System.out.println("states: ");
+        states.forEach(s -> System.out.println(s.getIdentifier()));
+        System.out.println("");
 
-        assertTrue(states.containsAll(statesThatMustBePresent));
-        assertTrue(oneOfTheseMustBePresent.stream().anyMatch(s -> states.contains(s)));
+        var statesThatShouldBePresent = List.of(new State("1"));
+
+        var oneOfTheseShouldBePresent = List.of(
+                new State("[1, 0]"),
+                new State("[0, 1]"));
+
+        System.out.println(oneOfTheseShouldBePresent.stream().anyMatch(s -> states.contains(s)));
+
+        assertTrue(states.containsAll(statesThatShouldBePresent));
+        assertTrue(oneOfTheseShouldBePresent.stream().anyMatch(s -> states.contains(s)));
     }
 
     @Test
@@ -111,14 +118,18 @@ public class FiniteAutomatonConverterTest {
 
         var state0 = new State("0");
         var state1 = new State("1");
-        var oneOfTheseIsPresent = List.of(new State("1,0"), new State("0,1"));
 
-        assertTrue(oneOfTheseIsPresent.stream()
+        var oneOfShouldBePresent = List.of(
+                new State("[1, 0]"),
+                new State("[0, 1]"));
+
+        assertTrue(oneOfShouldBePresent.stream()
                 .anyMatch(s -> transitionFunction.whereToGoWith(state0, "a").equals(Set.of(s))));
         assertTrue(
-                oneOfTheseIsPresent.stream().anyMatch(s -> transitionFunction.whereToGoWith(s, "a").equals(Set.of(s))));
+                oneOfShouldBePresent.stream()
+                        .anyMatch(s -> transitionFunction.whereToGoWith(s, "a").equals(Set.of(s))));
         assertTrue(
-                oneOfTheseIsPresent.stream()
+                oneOfShouldBePresent.stream()
                         .anyMatch(s -> transitionFunction.whereToGoWith(s, "b").equals(Set.of(state1))));
         assertEquals(Set.of(state1), transitionFunction.whereToGoWith(state1, "b"));
     }
