@@ -39,7 +39,7 @@ public class JffFileParserTest {
     @Test
     public void generatedAutomatonHasTheCorrectBasicThings() throws FileNotFoundException {
         var currentDir = System.getProperty("user.dir");
-        var jffFilePath = Path.of(currentDir, "src", "main", "resources", "testFile.jff");
+        var jffFilePath = Path.of(currentDir, "src", "main", "resources", "deterministic-automaton.jff");
         var automaton = parser.parseFile(jffFilePath);
 
         assertEquals(automaton.getAlphabet(), Set.of("a", "b"));
@@ -51,7 +51,7 @@ public class JffFileParserTest {
     @Test
     public void generatedAutomatonHasTheCorrectTransitionFunction() throws FileNotFoundException {
         var currentDir = System.getProperty("user.dir");
-        var jffFilePath = Path.of(currentDir, "src", "main", "resources", "testFile.jff");
+        var jffFilePath = Path.of(currentDir, "src", "main", "resources", "deterministic-automaton.jff");
         var automaton = parser.parseFile(jffFilePath);
         var transitionFunction = automaton.getTransitionFunction();
 
