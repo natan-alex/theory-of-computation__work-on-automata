@@ -29,8 +29,8 @@ public class FiniteAutomaton implements IFiniteAutomaton {
         allStates = extractAllStatesFrom(transitionSet);
         alphabet = extractAlphabetFrom(transitionSet);
         finalStates = extractFinalStatesFrom(transitionSet);
-        isDeterministic = checkIfTheTransitionSetRepresentsADeterministicAutomaton(transitionSet);
         transitionFunction = new TransitionFunction(transitionSet);
+        isDeterministic = checkIfAutomatonIsDeterministic();
     }
 
     private BaseState extractTheInitialStateAndValidateIt(Set<? extends BaseTransition> transitionSet) {
@@ -70,9 +70,18 @@ public class FiniteAutomaton implements IFiniteAutomaton {
                 .collect(Collectors.toSet());
     }
 
-    private boolean checkIfTheTransitionSetRepresentsADeterministicAutomaton(
-            Set<? extends BaseTransition> transitionSet) {
-        return transitionSet.stream().allMatch(t -> t.getDestinations().size() == 1);
+    private boolean checkIfAutomatonIsDeterministic() {
+        for (var state : allStates) {
+            for (var symbol : alphabet) {
+                var whereToGo = transitionFunction.whereToGoWith(state, symbol);
+
+                if (!whereToGo.isEmpty() && whereToGo.size() > 1) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private boolean isSentenceAcceptable(
