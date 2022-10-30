@@ -113,7 +113,7 @@ public class App {
                     var joinedStates = getJoinedStatesIdentifiers(whereToGo);
 
                     System.out.println(
-                            "\t\tFrom " + state.getIdentifier() + " with " + symbol + ": goes to " + joinedStates);
+                            "\t\tFrom " + state.getIdentifier() + " with " + symbol + ": Go to " + joinedStates);
                 }
             }
         }
