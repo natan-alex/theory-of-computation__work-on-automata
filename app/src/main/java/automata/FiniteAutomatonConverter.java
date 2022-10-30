@@ -1,8 +1,10 @@
 package automata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -18,6 +20,7 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
     private IFiniteAutomaton automatonToBeConverted;
     private ITransitionFunction automatonTransitionFunction;
     private Queue<Set<BaseState>> statesToWalkThrought;
+    private List<Set<BaseState>> statesHistory;
     private Map<Set<BaseState>, BaseState> destinationsAndCorrespondingStates;
     private Set<BaseTransition> newAutomatonTransitions;
 
@@ -37,9 +40,10 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
         automatonToBeConverted = automaton;
         automatonTransitionFunction = automaton.getTransitionFunction();
 
-        statesToWalkThrought = new LinkedList<Set<BaseState>>();
-        newAutomatonTransitions = new HashSet<BaseTransition>();
-        destinationsAndCorrespondingStates = new HashMap<Set<BaseState>, BaseState>();
+        statesToWalkThrought = new LinkedList<>();
+        statesHistory = new ArrayList<>();
+        newAutomatonTransitions = new HashSet<>();
+        destinationsAndCorrespondingStates = new HashMap<>();
 
         initStatesToWalkThroughtAndDestinationsMappings();
         walkThroughtStatesFillingTheTransitionSet();
@@ -59,7 +63,7 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
         while (!statesToWalkThrought.isEmpty()) {
             iterateOverAlphabetAddingNewStatesAndTransitions();
 
-            statesToWalkThrought.poll();
+            statesHistory.add(statesToWalkThrought.poll());
         }
     }
 
@@ -70,7 +74,7 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
             var newStateSet = createStateSetContainingDestinationsForQueueHeadWithSymbol(symbol);
 
             if (!newStateSet.isEmpty()) {
-                if (!statesToWalkThrought.contains(newStateSet)) {
+                if (!statesHistory.contains(newStateSet)) {
                     statesToWalkThrought.add(newStateSet);
                 }
 
@@ -106,7 +110,10 @@ public class FiniteAutomatonConverter implements IFiniteAutomatonConverter {
                 .map(s -> s.getIdentifier())
                 .toArray(String[]::new);
 
-        var newStateIdentifier = String.join(",", destinationIdentifiers);
+        var newStateIdentifier = destinationIdentifiers.length > 1
+                ? "[" + String.join(", ", destinationIdentifiers) + "]"
+                : String.join(", ", destinationIdentifiers);
+
         var destination = new State(newStateIdentifier);
 
         if (newStateSet.stream().anyMatch(s -> s.isAFinalState())) {
