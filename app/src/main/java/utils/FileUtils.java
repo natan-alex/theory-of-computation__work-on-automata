@@ -16,4 +16,13 @@ public class FileUtils {
             throw new FileNotFoundException("The file was not found at path " + path);
         }
     }
+
+    public static void throwIfFileNameDoesNotHaveSpecificExtension(String fileName, String extension) {
+        StringUtils.throwIfNullOrEmpty(fileName, "fileName");
+        StringUtils.throwIfNullOrEmpty(extension, "extension");
+
+        if (!fileName.endsWith(extension)) {
+            throw new IllegalArgumentException("The file name must have the " + extension + " extension");
+        }
+    }
 }
